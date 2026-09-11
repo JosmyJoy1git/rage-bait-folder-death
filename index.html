@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Folder Deletion Utility - Enterprise Edition v4.19</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Corporate Header -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <span class="nav-icon">📁</span>
+        <span class="nav-title">Enterprise Storage Management Utility</span>
+        <span class="nav-badge">v4.19.0-STABLE</span>
+      </div>
+      <div class="nav-meta">
+        <span class="status-indicator"><span class="dot"></span> System Status: Nominal</span>
+        <span class="compliance-tag">ISO-27001 Certified</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    <div class="content-wrapper">
+      
+      <!-- Utility Header -->
+      <section class="utility-header">
+        <h1 class="page-title">Folder Deletion Utility</h1>
+        <p class="page-subtitle">Delete folders safely, responsibly, and with extreme bureaucratic oversight.</p>
+      </section>
+
+      <!-- System Notice Banner -->
+      <div class="system-notice">
+        <span class="notice-icon">⚠️</span>
+        <div class="notice-text">
+          <strong>Mandatory IT Policy Warning:</strong> Folder deletion is permanent, un-undoable (unless requested via form IT-882), and may cause mild existential regret. Please proceed with caution.
+        </div>
+      </div>
+
+      <!-- Action & Filter Bar -->
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <label for="folder-search" class="visually-hidden">Search folders</label>
+          <input type="text" id="folder-search" placeholder="Search target folders..." class="form-input search-input">
+        </div>
+        <div class="toolbar-actions">
+          <button id="btn-add-folder" class="btn btn-secondary">+ Add Custom Folder</button>
+          <button id="btn-view-logs" class="btn btn-secondary">📋 View Wasted Time Log</button>
+        </div>
+      </div>
+
+      <!-- Folder Grid / List -->
+      <section class="folder-section">
+        <div class="section-title-bar">
+          <h2>Active Directory Folders (<span id="folder-count">5</span>)</h2>
+          <span class="help-text">Select a folder to initiate the safety confirmation workflow.</span>
+        </div>
+
+        <div id="folder-list" class="folder-list">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </section>
+      
+      <!-- Audit Log Panel (Initially hidden or modal) -->
+      <section id="audit-log-panel" class="card audit-panel hidden">
+        <div class="card-header">
+          <h3>Bureaucratic Audit & Time Wasted Summary</h3>
+          <button id="btn-close-log" class="btn-icon">&times;</button>
+        </div>
+        <div class="card-body">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-value" id="stat-attempts">0</span>
+              <span class="stat-label">Deletion Attempts</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="stat-questions">0</span>
+              <span class="stat-label">Questions Answered</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="stat-time">0s</span>
+              <span class="stat-label">Total Time Wasted</span>
+            </div>
+          </div>
+          <div class="log-history">
+            <h4>Activity History</h4>
+            <ul id="log-list" class="log-list">
+              <li class="empty-log">No folder deletion attempts recorded yet today.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Corporate Footer -->
+  <footer class="main-footer">
+    <div class="footer-container">
+      <span>&copy; 2026 Internal Utility Systems Corp. All rights reserved.</span>
+      <span>Department of Excessive Caution & Prevention</span>
+    </div>
+  </footer>
+
+  <!-- MULTI-STEP CONFIRMATION WIZARD MODAL -->
+  <div id="modal-wizard" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">⚠️</span>
+          <div>
+            <h3 id="wizard-header-title">Deletion Safeguard Wizard</h3>
+            <span id="wizard-step-indicator" class="wizard-step-badge">Step 1 of 16</span>
+          </div>
+        </div>
+        <button id="wizard-btn-close" class="btn-icon" title="Cancel Deletion Wizard">&times;</button>
+      </div>
+
+      <!-- Step Progress Bar -->
+      <div class="progress-bar-container">
+        <div id="wizard-progress" class="progress-bar-fill" style="width: 6%;"></div>
+      </div>
+
+      <!-- Selected Folder Quick Reference Banner -->
+      <div class="target-folder-banner">
+        <span class="folder-mini-icon">📁</span>
+        <div class="target-info">
+          <span class="target-name" id="target-folder-name">College Project</span>
+          <span class="target-path" id="target-folder-path">C:\Users\DELL\Desktop\College Project</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Step Content Body -->
+      <div id="wizard-body" class="modal-body">
+        <!-- Content inserted dynamically by JS based on current step -->
+      </div>
+
+      <!-- Modal Footer Controls -->
+      <div class="modal-footer" id="wizard-footer">
+        <button id="wizard-btn-cancel" class="btn btn-secondary">Cancel & Keep Folder</button>
+        <div class="footer-right-buttons">
+          <button id="wizard-btn-back" class="btn btn-secondary hidden">Back</button>
+          <button id="wizard-btn-next" class="btn btn-primary">Continue &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CUSTOM FOLDER MODAL -->
+  <div id="modal-add-folder" class="modal-backdrop hidden">
+    <div class="modal-dialog modal-small">
+      <div class="modal-header">
+        <h3>Create Test Folder</h3>
+        <button id="add-modal-close" class="btn-icon">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-folder">
+          <div class="form-group">
+            <label for="new-folder-name">Folder Name</label>
+            <input type="text" id="new-folder-name" class="form-input" placeholder="e.g., Important Backup 2026" required>
+          </div>
+          <div class="form-group">
+            <label for="new-folder-path">Location Path</label>
+            <input type="text" id="new-folder-path" class="form-input" placeholder="C:\Users\DELL\Desktop\..." required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="new-folder-files">File Count</label>
+              <input type="number" id="new-folder-files" class="form-input" value="42" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="new-folder-size">Size (MB)</label>
+              <input type="text" id="new-folder-size" class="form-input" value="128 MB" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="add-modal-cancel" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Folder</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
