@@ -492,6 +492,26 @@ body {
   padding: var(--spacing-md);
 }
 
+#modal-add-folder {
+  z-index: 1200;
+}
+
+@keyframes newFolderPulse {
+  0% {
+    background-color: #e0f2fe;
+    border-left: 4px solid var(--accent-primary);
+  }
+  100% {
+    background-color: transparent;
+    border-left: 1px solid var(--border-color);
+  }
+}
+
+.folder-item-new {
+  animation: newFolderPulse 2.5s ease-out;
+}
+
+
 .modal-dialog {
   background-color: var(--bg-card);
   border-radius: var(--border-radius);

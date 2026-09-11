@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Render Main Folder List
-function renderFolderList(filter = '') {
+function renderFolderList(filter = '', highlightId = null) {
   DOM.folderList.innerHTML = '';
   const filtered = state.folders.filter(f => 
     !f.deleted && f.name.toLowerCase().includes(filter.toLowerCase())
@@ -130,7 +130,8 @@ function renderFolderList(filter = '') {
 
   filtered.forEach(folder => {
     const item = document.createElement('div');
-    item.className = 'folder-item';
+    const isNew = folder.id === highlightId;
+    item.className = `folder-item ${isNew ? 'folder-item-new' : ''}`;
     item.innerHTML = `
       <div class="folder-main-info">
         <span class="folder-icon">📁</span>
@@ -149,6 +150,12 @@ function renderFolderList(filter = '') {
       </div>
     `;
     DOM.folderList.appendChild(item);
+
+    if (isNew) {
+      setTimeout(() => {
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
   });
 
   // Attach delete buttons
@@ -203,12 +210,29 @@ function setupEventListeners() {
         created: new Date().toLocaleDateString('en-US'),
         deleted: false
       };
-      state.folders.push(newFolder);
-      renderFolderList();
+      
+      // Unshift to top of array so it appears at the very top of the list
+      state.folders.unshift(newFolder);
+      
+      // Clear search query filter to ensure new folder is visible
+      DOM.searchInput.value = '';
+
+      // Close wizard modal if open
+      if (state.currentWizard.active) {
+        cancelWizard();
+      }
+
+      // Hide Add Folder Modal and reset form
       DOM.modalAddFolder.classList.add('hidden');
       DOM.formAddFolder.reset();
+
+      // Render list highlighting the newly added folder
+      renderFolderList('', newFolder.id);
+
+      logAuditEntry('CREATED', `Added new custom test folder '${name}' (${size})`);
     }
   });
+
 
   // Wizard General Navigation
   DOM.wizardBtnClose.addEventListener('click', cancelWizard);
