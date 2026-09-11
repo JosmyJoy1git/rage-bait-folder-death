@@ -646,16 +646,18 @@ function renderWizardStep() {
           <span class="notice-text">You are approaching the ultimate point of execution.</span>
         </div>
       `;
+      setupEvadingButton();
       break;
 
     case 15:
       DOM.wizardBody.innerHTML = `
         <h4 class="wizard-question-title">Final Confirmation 2 of 3</h4>
-        <p class="wizard-question-subtitle">Safeguard Level 2. Are you triple sure? This is your penultimate chance to turn back.</p>
+        <p class="wizard-question-subtitle">Safeguard Level 2. Are you triple sure? This is your penultimate opportunity to turn back.</p>
         <p style="font-size: 13px; color: var(--text-secondary);">
           If you click Continue, you will be required to type the final deletion command.
         </p>
       `;
+      setupEvadingButton();
       break;
 
     case 16:
@@ -666,8 +668,51 @@ function renderWizardStep() {
         <span id="step16-error" class="validation-error hidden"></span>
       `;
       DOM.wizardBtnNext.textContent = 'PERMANENTLY EXECUTE DELETION';
-      DOM.wizardBtnNext.className = 'btn btn-danger';
+      DOM.wizardBtnNext.className = 'btn btn-danger btn-evading';
+      setupEvadingButton();
       break;
+  }
+}
+
+// EVIL UI: Evading Button Handler
+let evadeCount = 0;
+let evadeHandlerAttached = false;
+
+function setupEvadingButton() {
+  evadeCount = 0;
+  DOM.wizardBtnNext.classList.add('btn-evading');
+  DOM.wizardBtnNext.style.transform = 'translate(0, 0)';
+
+  if (!evadeHandlerAttached) {
+    evadeHandlerAttached = true;
+    DOM.wizardBtnNext.addEventListener('mouseover', handleButtonEvade);
+  }
+}
+
+function handleButtonEvade(e) {
+  if (evadeCount < 3) {
+    evadeCount++;
+    const randomX = (Math.random() > 0.5 ? 1 : -1) * (40 + Math.floor(Math.random() * 60));
+    const randomY = (Math.random() > 0.5 ? 1 : -1) * (15 + Math.floor(Math.random() * 30));
+    
+    DOM.wizardBtnNext.style.transform = `translate(${randomX}px, ${randomY}px)`;
+
+    // Show temporary evade notification
+    let notice = document.getElementById('evade-notice-msg');
+    if (!notice) {
+      notice = document.createElement('span');
+      notice.id = 'evade-notice-msg';
+      notice.className = 'evade-notice';
+      DOM.wizardFooter.appendChild(notice);
+    }
+    notice.textContent = `⚡ Warning: Anti-deletion safety lock dodging mouse cursor! (${evadeCount}/3)`;
+
+    if (evadeCount >= 3) {
+      setTimeout(() => {
+        DOM.wizardBtnNext.style.transform = 'translate(0, 0)';
+        if (notice) notice.textContent = '✅ Safety lock stabilized. Mouse agility verified.';
+      }, 400);
+    }
   }
 }
 
@@ -723,7 +768,7 @@ function executeDeletionLoading() {
   }, 400);
 }
 
-// Finish Deletion Process & Show Outcome Certificate
+// Finish Deletion Process & Show Outcome Certificate + Funeral Memorial
 function finishDeletionProcess() {
   const folder = state.folders.find(f => f.id === state.currentWizard.folderId);
   if (folder) {
@@ -736,47 +781,131 @@ function finishDeletionProcess() {
   logAuditEntry('DELETED', `Successfully wasted ${durationSec}s deleting folder '${folder ? folder.name : 'Target'}' across 16 confirmation steps.`);
   updateStatsDisplay();
 
-  DOM.wizardHeaderTitle.textContent = 'Folder Deletion Summary';
+  DOM.wizardHeaderTitle.textContent = 'Folder Deletion & Memorial Service';
   DOM.wizardStepIndicator.textContent = 'Completed';
   DOM.wizardProgress.style.width = '100%';
 
+  const createdDate = folder ? folder.created : 'Unknown';
+  const todayDate = new Date().toLocaleDateString('en-US');
+  const folderName = folder ? folder.name : 'Target Folder';
+  const folderFiles = folder ? folder.files : 37;
+  const folderSize = folder ? folder.size : '248 MB';
+
   DOM.wizardBody.innerHTML = `
     <div style="text-align: center; padding: 12px 0;">
-      <div style="font-size: 40px; margin-bottom: 8px;">🎉📁💥</div>
-      <h4 class="wizard-question-title" style="color: var(--color-success);">Folder Deletion Complete!</h4>
+      <h4 class="wizard-question-title" style="color: var(--color-danger);">Folder Deletion Complete</h4>
       <p class="wizard-question-subtitle">
-        Congratulations! You successfully endured all 16 bureaucratic verification steps.
+        The folder has been purged. Please join us in paying final respects.
       </p>
 
-      <div class="card" style="border: 1px solid var(--border-color); padding: 16px; background-color: #fafbfc; text-align: left; margin: 16px 0;">
-        <h5 style="font-size: 13px; font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
+      <!-- FOLDER FUNERAL MEMORIAL CARD -->
+      <div class="tombstone-card" id="tombstone-card">
+        <div class="tombstone-header">🪦</div>
+        <div class="tombstone-title">Here Lies '${escapeHTML(folderName)}'</div>
+        <div class="tombstone-dates">Born: ${createdDate} &bull; Deceased: ${todayDate}</div>
+        <div class="tombstone-epitaph">
+          "A beloved container of ${folderFiles} files (${folderSize}). It had so much unfulfilled potential and so many unread documents."
+        </div>
+        <div class="tombstone-actions">
+          <button id="btn-pay-respects" class="btn btn-respect">
+            💐 Press 'F' to Pay Respects (or Click Here)
+          </button>
+          <div class="respect-counter-badge">
+            Flowers Laid: <span id="respect-count">0</span> 💐
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border: 1px solid var(--border-color); padding: 14px; background-color: #fafbfc; text-align: left; margin: 16px 0;">
+        <h5 style="font-size: 13px; font-weight: 600; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">
           OFFICIAL DELETION CERTIFICATE (#DEL-${Math.floor(Math.random()*89999+10000)})
         </h5>
         <div style="font-size: 12px; line-height: 1.6; font-family: var(--font-mono);">
-          <div>• Target Folder: <strong>${folder ? escapeHTML(folder.name) : 'Folder'}</strong></div>
+          <div>• Target Folder: <strong>${escapeHTML(folderName)}</strong></div>
           <div>• Steps Passed: <strong>16 / 16</strong></div>
-          <div>• Time Wasted: <strong>${durationSec} seconds</strong></div>
-          <div>• Current Status: <span style="color: var(--color-danger); font-weight: 600;">Erased from active index</span></div>
-          <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted);">
-            * Note: A backup copy has been automatically moved to <code>C:\\Recycle Bin\\Restored_Folders\\Do_Not_Delete</code> per IT compliance policy #402.
-          </div>
+          <div>• Total Time Wasted: <strong>${durationSec} seconds</strong></div>
+          <div>• Status: <span style="color: var(--color-danger); font-weight: 600;">Purged to Recycle Bin</span></div>
         </div>
       </div>
     </div>
   `;
 
+  let respectCount = 0;
+  const btnRespect = document.getElementById('btn-pay-respects');
+  const countSpan = document.getElementById('respect-count');
+  const tombstoneCard = document.getElementById('tombstone-card');
+
+  function payRespects() {
+    respectCount++;
+    countSpan.textContent = respectCount;
+    playSolemnChime();
+
+    // Floating flower animation
+    const flower = document.createElement('div');
+    flower.className = 'floating-flower';
+    flower.textContent = ['💐', '🌸', '🌹', '🕊️'][Math.floor(Math.random() * 4)];
+    flower.style.left = `${30 + Math.random() * 40}%`;
+    flower.style.bottom = '20px';
+    tombstoneCard.appendChild(flower);
+
+    setTimeout(() => {
+      flower.remove();
+    }, 1200);
+  }
+
+  btnRespect.addEventListener('click', payRespects);
+
+  // Global Keyboard 'F' listener
+  const keyHandler = (e) => {
+    if (e.key === 'f' || e.key === 'F') {
+      // Don't trigger if user is typing in an input
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+      payRespects();
+    }
+  };
+  document.addEventListener('keydown', keyHandler);
+
   DOM.wizardFooter.classList.remove('hidden');
   DOM.wizardBtnBack.classList.add('hidden');
-  DOM.wizardBtnNext.textContent = 'Close & Return to Main Screen';
+  DOM.wizardBtnNext.textContent = 'Close & Return to Dashboard';
   DOM.wizardBtnNext.className = 'btn btn-primary';
+  DOM.wizardBtnNext.style.transform = 'translate(0, 0)';
   
   DOM.wizardBtnNext.onclick = () => {
+    document.removeEventListener('keydown', keyHandler);
     DOM.modalWizard.classList.add('hidden');
     renderFolderList();
-    // Reset click handler back to default handleWizardNext
     DOM.wizardBtnNext.onclick = null;
     DOM.wizardBtnNext.addEventListener('click', handleWizardNext);
   };
+}
+
+// Web Audio API Synthesizer for Solemn Funeral Chime
+function playSolemnChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    // Low solemn organ/bell tone (A3 = 220Hz)
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 1.2);
+    
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 1.2);
+  } catch (err) {
+    // Audio context may be restricted by browser autoplay policy
+  }
 }
 
 // Audit Log Helpers
